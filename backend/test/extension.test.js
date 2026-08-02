@@ -78,12 +78,15 @@ test("API Key 未出现在扩展代码中", () => {
     "popup.html",
     "popup.js",
     "content.js",
-    "page-bridge.js"
+    "page-bridge.js",
+    "background.js",
+    "offscreen.js"
   ]
     .map(readExtensionFile)
     .join("\n");
 
   assert.equal(extensionSource.includes("OPENAI_API_KEY"), false);
+  assert.equal(extensionSource.includes("BAILIAN_API_KEY"), false);
   assert.equal(/sk-[A-Za-z0-9_-]{12,}/.test(extensionSource), false);
 });
 

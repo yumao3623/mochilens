@@ -19,23 +19,23 @@ When visiting a YouTube page, the content script writes `[MochiLens] Content scr
 ## Run the Phase 8.1 backend
 
 1. Open a terminal in the `backend` directory.
-2. Copy `.env.example` to `.env`, set an official OpenAI `OPENAI_API_KEY`, and choose supported `OPENAI_MODEL` and `OPENAI_TRANSCRIBE_MODEL` values. The backend connects only to the official `api.openai.com` service.
+2. Copy `.env.example` to `.env`. Add the Alibaba Cloud Model Studio API Key and the China (Beijing) API Host shown when that key was created. Never place either value in the extension.
 3. Run `npm install`.
 4. Run `npm start`.
-5. Open `http://127.0.0.1:3000/api/health` and confirm that `openaiConfigured` is `true`.
+5. Open `http://127.0.0.1:3000/api/health` and confirm that `bailianConfigured` is `true`.
 6. Open `http://127.0.0.1:3000/api/ai-health` to verify the network connection, API key, and configured model. A successful response has `ok: true` and `reachable: true`.
 
-The default text model is `gpt-5.6-luna` with low reasoning effort for a cost-sensitive, latency-aware production baseline. Audio transcription uses `gpt-4o-mini-transcribe`. These values can be changed through `.env` without editing source code.
+The default text model is `qwen3.7-flash`. Audio transcription uses `qwen3-asr-flash`, and `qwen3.5-omni-flash` is reserved for a later visual-analysis phase. These values can be changed through `.env` without editing source code.
 
-The backend connects directly to the official OpenAI API. Keep the API key only in `backend/.env`; never place it in extension files or commit it to source control.
+The backend connects directly to the Alibaba Cloud Model Studio endpoint configured in `BAILIAN_API_HOST`. It uses the existing OpenAI-compatible Node client only as a protocol library; no request is sent to `api.openai.com`. Keep the API key only in `backend/.env`; never place it in extension files or commit it to source control.
 
-For hosted deployments, the backend listens on `0.0.0.0` and uses the platform-provided `PORT`. Keep `OPENAI_API_KEY` in the hosting platform's secret-variable settings; never upload the local `.env` file.
+For hosted deployments, the backend listens on `0.0.0.0` and uses the platform-provided `PORT`. Keep `BAILIAN_API_KEY` and `BAILIAN_API_HOST` in the hosting platform's secret-variable settings; never upload the local `.env` file.
 
 `POST /api/summarize` returns `summary` and `keyPoints`. `POST /api/chat` accepts `transcript` and `question`, then returns an `answer` grounded in the transcript.
 
 `POST /api/transcribe` accepts a raw WebM, Ogg, MP4, or MP3 audio body and returns `transcript`. Tab audio capture only starts after the user clicks the fallback button, never accesses the microphone, and samples at most nine seconds in Phase 8.1.
 
-On this Windows development machine, run `backend\start-local.cmd`. The helper uses the installed Node.js executable and the local Clash proxy at `127.0.0.1:7890`. The normal `npm start` command remains proxy-free for future hosted deployments.
+On this Windows development machine, run `backend\start-local.cmd`. The helper uses the installed Node.js executable directly and does not require Clash, a VPN, or a local proxy to reach the China (Beijing) endpoint.
 
 ## Run automated tests
 
