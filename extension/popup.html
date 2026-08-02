@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MochiLens</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <main class="app">
+      <header class="app__header">
+        <img class="brand-mark" src="icons/icon-48.png" alt="">
+        <div>
+          <p class="eyebrow">麻薯视频学习助手</p>
+          <h1>MochiLens</h1>
+          <p class="subtitle">快速理解视频，继续深入提问。</p>
+        </div>
+      </header>
+
+      <section class="panel panel--video" aria-labelledby="video-heading">
+        <div class="video-heading-row">
+          <h2 id="video-heading">当前视频</h2>
+          <p id="video-status" class="status status-chip" role="status" aria-live="polite">
+            正在识别...
+          </p>
+        </div>
+        <div id="video-details" class="video-details" hidden>
+          <p id="video-title" class="video-title"></p>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="transcript-heading">
+        <h2 id="transcript-heading"><span aria-hidden="true">1</span>视频解析</h2>
+        <p id="transcript-status" class="placeholder transcript-status feedback" role="status" aria-live="polite">
+          解析视频内容后，可以查看视频字幕。
+        </p>
+        <button id="load-transcript" type="button" disabled>解析视频</button>
+        <div id="audio-fallback" class="audio-fallback" hidden>
+          <p id="audio-fallback-text">
+            未找到 YouTube 字幕。可在你确认后采集开头、中间、结尾各 3 秒音频并使用 AI 转成文字；不会读取麦克风。
+          </p>
+          <button id="start-audio-transcription" class="button-secondary" type="button">
+            使用音频识别
+          </button>
+        </div>
+        <div id="transcript-output" class="transcript-output" hidden>
+          <p id="transcript-meta" class="transcript-meta"></p>
+          <details id="transcript-details" class="transcript-details">
+            <summary>查看视频字幕</summary>
+            <p id="transcript-text" class="transcript-text"></p>
+          </details>
+        </div>
+        <details id="transcript-debug" class="transcript-debug" hidden>
+          <summary>查看诊断信息</summary>
+          <pre id="transcript-debug-text"></pre>
+        </details>
+      </section>
+
+      <section class="panel" aria-labelledby="summary-heading">
+        <h2 id="summary-heading"><span aria-hidden="true">2</span>视频总结</h2>
+        <p id="summary-status" class="placeholder summary-status feedback" role="status" aria-live="polite">
+          解析视频后可生成总结。
+        </p>
+        <button id="generate-summary" type="button" disabled>生成总结</button>
+        <div id="summary-output" class="summary-output result-box" aria-live="polite" hidden>
+          <p id="summary-text" class="summary-text"></p>
+          <h3>核心知识点</h3>
+          <ul id="key-points" class="key-points"></ul>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="chat-heading">
+        <h2 id="chat-heading"><span aria-hidden="true">3</span>视频问答</h2>
+        <div class="field-heading">
+          <label for="question">你的问题</label>
+          <span id="question-count" class="question-count">0 / 2000</span>
+        </div>
+        <textarea id="question" rows="3" maxlength="2000" aria-describedby="question-help chat-status" placeholder="问一个与视频有关的问题" disabled></textarea>
+        <p id="question-help" class="field-help">按 Ctrl + Enter 快速发送</p>
+        <p id="chat-status" class="placeholder chat-status feedback" role="status" aria-live="polite">
+          解析视频后可以针对视频提问。
+        </p>
+        <button id="send-question" type="button" disabled>发送问题</button>
+        <div id="chat-output" class="chat-output result-box" aria-live="polite" hidden>
+          <h3>AI 回答</h3>
+          <div id="answer-text" class="answer-text"></div>
+        </div>
+      </section>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

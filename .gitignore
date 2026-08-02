@@ -1,0 +1,32 @@
+# Dependencies
+**/node_modules/
+
+# Environment files and secrets
+**/.env
+**/.env.*
+!**/.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Generated previews and temporary files
+.spec-render/
+**/.cache/
+**/tmp/
+**/temp/
+*.log
+*.tmp
+*.bak
+
+# Build and test outputs
+**/dist/
+**/build/
+**/coverage/
+*.zip
+*.crx
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+Desktop.ini

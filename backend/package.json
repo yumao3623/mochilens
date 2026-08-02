@@ -1,0 +1,20 @@
+{
+  "name": "mochilens-backend",
+  "version": "0.4.0",
+  "private": true,
+  "description": "Backend API for the MochiLens Chrome extension.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "openai": "^7.2.0",
+    "zod": "^4.4.3"
+  }
+}
