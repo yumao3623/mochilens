@@ -1,4 +1,4 @@
-const BACKEND_URL = "http://127.0.0.1:3000";
+const BACKEND_URL = "https://mochilens-api.onrender.com";
 const MAX_SAMPLE_SECONDS = 9;
 const audioJobs = new Map();
 let creatingOffscreenDocument = null;

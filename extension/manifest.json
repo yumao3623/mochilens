@@ -10,7 +10,7 @@
     "tabCapture"
   ],
   "host_permissions": [
-    "http://127.0.0.1:3000/*"
+    "https://mochilens-api.onrender.com/*"
   ],
   "action": {
     "default_title": "MochiLens",

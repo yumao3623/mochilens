@@ -19,7 +19,9 @@ test("扩展使用 Manifest V3 和 MochiLens 品牌版本", () => {
   assert.equal(manifest.minimum_chrome_version, "116");
   assert.equal(manifest.action.default_popup, "popup.html");
   assert.equal(manifest.icons[128], "icons/icon-128.png");
-  assert.ok(manifest.host_permissions.includes("http://127.0.0.1:3000/*"));
+  assert.deepEqual(manifest.host_permissions, [
+    "https://mochilens-api.onrender.com/*"
+  ]);
   assert.ok(manifest.permissions.includes("tabCapture"));
   assert.ok(manifest.permissions.includes("offscreen"));
   assert.equal(manifest.background.service_worker, "background.js");
@@ -83,6 +85,17 @@ test("API Key 未出现在扩展代码中", () => {
 
   assert.equal(extensionSource.includes("OPENAI_API_KEY"), false);
   assert.equal(/sk-[A-Za-z0-9_-]{12,}/.test(extensionSource), false);
+});
+
+test("扩展只连接已部署的 MochiLens 后端", () => {
+  const popupJavaScript = readExtensionFile("popup.js");
+  const backgroundJavaScript = readExtensionFile("background.js");
+  const remoteBackendURL = "https://mochilens-api.onrender.com";
+
+  assert.ok(popupJavaScript.includes(remoteBackendURL));
+  assert.ok(backgroundJavaScript.includes(remoteBackendURL));
+  assert.equal(popupJavaScript.includes("127.0.0.1:3000"), false);
+  assert.equal(backgroundJavaScript.includes("127.0.0.1:3000"), false);
 });
 
 test("MochiLens 图标文件完整", () => {

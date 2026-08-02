@@ -26,7 +26,7 @@ const elements = {
   answerText: document.querySelector("#answer-text")
 };
 
-const BACKEND_URL = "http://127.0.0.1:3000";
+const BACKEND_URL = "https://mochilens-api.onrender.com";
 let lastVideoSignature = "";
 let refreshRequestId = 0;
 let summaryRequestId = 0;
@@ -324,7 +324,7 @@ async function sendQuestion() {
 
     elements.chatStatus.textContent =
       error instanceof TypeError
-        ? "无法连接后端，请确认 PowerShell 中的服务正在运行。"
+        ? "无法连接 MochiLens 服务，请检查网络后重试。"
         : error.message;
     elements.chatStatus.dataset.type = "error";
   } finally {
@@ -379,7 +379,7 @@ async function generateSummary() {
 
     elements.summaryStatus.textContent =
       error instanceof TypeError
-        ? "无法连接后端，请确认 PowerShell 中的服务正在运行。"
+        ? "无法连接 MochiLens 服务，请检查网络后重试。"
         : error.message;
     elements.summaryStatus.dataset.type = "error";
   } finally {
