@@ -51,7 +51,7 @@ async function uploadRecording(capture, blob) {
       body: blob
     });
   } catch {
-    throw new Error("无法连接后端，请确认 PowerShell 中的服务正在运行。");
+    throw new Error("无法连接 MochiLens 服务，请检查网络后重试。");
   }
 
   const result = await response.json().catch(() => null);

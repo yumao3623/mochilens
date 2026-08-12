@@ -1,4 +1,6 @@
-const BACKEND_URL = "http://127.0.0.1:3000";
+importScripts("config.js");
+
+const BACKEND_URL = globalThis.MOCHILENS_CONFIG.backendUrl;
 const MAX_SAMPLE_SECONDS = 9;
 const audioJobs = new Map();
 let creatingOffscreenDocument = null;

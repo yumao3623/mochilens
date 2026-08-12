@@ -26,7 +26,12 @@ const elements = {
   answerText: document.querySelector("#answer-text")
 };
 
-const BACKEND_URL = "http://127.0.0.1:3000";
+const {
+  backendUrl: BACKEND_URL,
+  requiredBackendPhase: REQUIRED_BACKEND_PHASE,
+  requiredBackendContract: REQUIRED_BACKEND_CONTRACT,
+  requiredAIProvider: REQUIRED_AI_PROVIDER
+} = globalThis.MOCHILENS_CONFIG;
 let lastVideoSignature = "";
 let refreshRequestId = 0;
 let summaryRequestId = 0;
@@ -36,6 +41,43 @@ let currentVideoId = "";
 let currentTranscript = "";
 let chatRequestInProgress = false;
 let audioJobInProgress = false;
+let backendCompatible = false;
+
+async function verifyBackendCompatibility() {
+  try {
+    const apiResponse = await fetch(`${BACKEND_URL}/api/health`);
+    const health = await apiResponse.json().catch(() => null);
+    backendCompatible = Boolean(
+      apiResponse.ok &&
+        health?.ok &&
+        health.phase === REQUIRED_BACKEND_PHASE &&
+        health.contractVersion === REQUIRED_BACKEND_CONTRACT &&
+        health.aiProvider === REQUIRED_AI_PROVIDER &&
+        health.bailianConfigured === true
+    );
+  } catch {
+    backendCompatible = false;
+  }
+
+  elements.audioButton.disabled = !backendCompatible || audioJobInProgress;
+  elements.summaryButton.disabled = !backendCompatible || !currentTranscript;
+
+  if (currentTranscript && elements.summaryOutput.hidden) {
+    elements.summaryStatus.textContent = backendCompatible
+      ? "点击按钮生成视频总结。"
+      : "AI 服务正在升级，字幕仍可正常查看。";
+  }
+
+  if (currentTranscript && elements.chatOutput.hidden) {
+    elements.chatStatus.textContent = backendCompatible
+      ? "输入与当前视频有关的问题。"
+      : "AI 服务正在升级，暂时无法提问。";
+  }
+
+  updateQuestionControls();
+
+  return backendCompatible;
+}
 
 function setButtonLoading(button, loading, defaultText, loadingText) {
   button.textContent = loading ? loadingText : defaultText;
@@ -48,9 +90,11 @@ function updateQuestionControls() {
   const transcriptAvailable = Boolean(currentTranscript);
 
   elements.questionCount.textContent = `${questionLength} / 2000`;
-  elements.question.disabled = !transcriptAvailable || chatRequestInProgress;
+  elements.question.disabled =
+    !transcriptAvailable || !backendCompatible || chatRequestInProgress;
   elements.chatButton.disabled =
     !transcriptAvailable ||
+    !backendCompatible ||
     chatRequestInProgress ||
     elements.question.value.trim().length === 0;
 }
@@ -74,7 +118,7 @@ function resetTranscript(videoAvailable) {
   elements.audioFallbackText.textContent =
     "未找到 YouTube 字幕。可在你确认后采集开头、中间、结尾各 3 秒音频并使用 AI 转成文字；不会读取麦克风。";
   audioJobInProgress = false;
-  elements.audioButton.disabled = false;
+  elements.audioButton.disabled = !backendCompatible;
   setButtonLoading(elements.audioButton, false, "使用音频识别", "准备中...");
   elements.transcriptStatus.textContent = videoAvailable
     ? "解析视频内容后，可以查看视频字幕。"
@@ -87,12 +131,14 @@ function resetTranscript(videoAvailable) {
 
 function resetSummary(transcriptAvailable) {
   summaryRequestId += 1;
-  elements.summaryButton.disabled = !transcriptAvailable;
+  elements.summaryButton.disabled = !transcriptAvailable || !backendCompatible;
   elements.summaryOutput.hidden = true;
   elements.summaryText.textContent = "";
   elements.keyPoints.replaceChildren();
   elements.summaryStatus.textContent = transcriptAvailable
-    ? "点击按钮生成视频总结。"
+    ? backendCompatible
+      ? "点击按钮生成视频总结。"
+      : "AI 服务正在升级，字幕仍可正常查看。"
     : "解析视频后可生成总结。";
   elements.summaryStatus.dataset.type = "info";
   setButtonLoading(elements.summaryButton, false, "生成总结", "生成中...");
@@ -107,7 +153,9 @@ function resetChat(transcriptAvailable) {
   elements.chatOutput.hidden = true;
   elements.answerText.textContent = "";
   elements.chatStatus.textContent = transcriptAvailable
-    ? "输入与当前视频有关的问题。"
+    ? backendCompatible
+      ? "输入与当前视频有关的问题。"
+      : "AI 服务正在升级，暂时无法提问。"
     : "解析视频后可以针对视频提问。";
   elements.chatStatus.dataset.type = "info";
   setButtonLoading(elements.chatButton, false, "发送问题", "回答中...");
@@ -272,6 +320,12 @@ function showAnswer(response) {
 }
 
 async function sendQuestion() {
+  if (!backendCompatible) {
+    elements.chatStatus.textContent = "AI 服务正在升级，暂时无法提问。";
+    elements.chatStatus.dataset.type = "error";
+    return;
+  }
+
   const question = elements.question.value.trim();
 
   if (!currentTranscript) {
@@ -324,7 +378,7 @@ async function sendQuestion() {
 
     elements.chatStatus.textContent =
       error instanceof TypeError
-        ? "无法连接后端，请确认 PowerShell 中的服务正在运行。"
+        ? "无法连接 MochiLens 服务，请检查网络后重试。"
         : error.message;
     elements.chatStatus.dataset.type = "error";
   } finally {
@@ -337,6 +391,12 @@ async function sendQuestion() {
 }
 
 async function generateSummary() {
+  if (!backendCompatible) {
+    elements.summaryStatus.textContent = "AI 服务正在升级，暂时无法生成总结。";
+    elements.summaryStatus.dataset.type = "error";
+    return;
+  }
+
   if (!currentTranscript) {
     elements.summaryStatus.textContent = "请先解析视频。";
     elements.summaryStatus.dataset.type = "error";
@@ -379,7 +439,7 @@ async function generateSummary() {
 
     elements.summaryStatus.textContent =
       error instanceof TypeError
-        ? "无法连接后端，请确认 PowerShell 中的服务正在运行。"
+        ? "无法连接 MochiLens 服务，请检查网络后重试。"
         : error.message;
     elements.summaryStatus.dataset.type = "error";
   } finally {
@@ -495,6 +555,12 @@ async function syncAudioJobStatus() {
 }
 
 async function startAudioTranscription() {
+  if (!backendCompatible) {
+    elements.audioFallbackText.textContent =
+      "AI 服务正在升级，暂时无法使用音频识别。";
+    return;
+  }
+
   if (!activeTabId || !currentVideoId) {
     return;
   }
@@ -648,7 +714,7 @@ chrome.runtime.onMessage.addListener((message) => {
   }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   elements.transcriptButton.addEventListener("click", loadTranscript);
   elements.audioButton.addEventListener("click", startAudioTranscription);
   elements.summaryButton.addEventListener("click", generateSummary);
@@ -666,4 +732,5 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   refreshCurrentVideo();
   window.setInterval(refreshCurrentVideo, 750);
+  verifyBackendCompatibility();
 });
