@@ -6,6 +6,8 @@ MochiLens is a Chrome Extension Manifest V3 video learning assistant developed p
 
 Phase 8.1 is under user testing. The extension first retrieves YouTube captions. When a video has no caption track, the user can explicitly sample three seconds from the beginning, middle, and end of the tab audio, then transcribe at most nine seconds in total. It then generates an AI summary and answers questions using the resulting text record.
 
+The extension validates the backend phase and AI provider before enabling video processing. This prevents a stale deployment from silently serving a different AI provider.
+
 ## Load the extension locally
 
 1. Open `chrome://extensions` in Chrome.
@@ -31,12 +33,16 @@ The backend connects directly to the Alibaba Cloud Model Studio endpoint configu
 
 For hosted deployments, the backend listens on `0.0.0.0` and uses the platform-provided `PORT`. Keep `BAILIAN_API_KEY` and `BAILIAN_API_HOST` in the hosting platform's secret-variable settings; never upload the local `.env` file.
 
+The repository-root `render.yaml` defines a reproducible free Render Web Service. After deploying, run `npm run check:release` from `backend`; it verifies that the extension permission, backend phase, provider, configuration state, and live endpoint agree. Set `SKIP_REMOTE_HEALTH=1` only in CI or when intentionally checking repository files without contacting production.
+
 `POST /api/summarize` returns `summary` and `keyPoints`. `POST /api/chat` accepts `transcript` and `question`, then returns an `answer` grounded in the transcript.
 
 `POST /api/transcribe` accepts a raw WebM, Ogg, MP4, or MP3 audio body and returns `transcript`. Tab audio capture only starts after the user clicks the fallback button, never accesses the microphone, and samples at most nine seconds in Phase 8.1.
 
-On this Windows development machine, run `backend\start-local.cmd`. The helper uses the installed Node.js executable directly and does not require Clash, a VPN, or a local proxy to reach the China (Beijing) endpoint.
+On Windows, run `backend\start-local.cmd`. The helper finds Node.js 24 or newer from `PATH` and does not require Clash, a VPN, or a local proxy to reach the China (Beijing) endpoint.
 
 ## Run automated tests
 
 From the `backend` directory, run `npm.cmd test`. The test suite uses mock AI services, does not call the configured provider, and does not consume API credits.
+
+See `docs/TEST_MATRIX.md` for real-browser acceptance tests, `docs/RENDER_DEPLOYMENT.md` for zero-cost backend deployment, and `docs/RELEASE_PLAN.md` for the path from local testing to Chrome Web Store publication.

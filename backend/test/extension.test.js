@@ -10,6 +10,14 @@ function readExtensionFile(fileName) {
   return fs.readFileSync(path.join(extensionDirectory, fileName), "utf8");
 }
 
+function readExtensionConfig() {
+  const context = { globalThis: {} };
+  new vm.Script(readExtensionFile("config.js"), { filename: "config.js" }).runInNewContext(
+    context
+  );
+  return context.globalThis.MOCHILENS_CONFIG;
+}
+
 test("扩展使用 Manifest V3 和 MochiLens 品牌版本", () => {
   const manifest = JSON.parse(readExtensionFile("manifest.json"));
 
@@ -30,6 +38,7 @@ test("扩展使用 Manifest V3 和 MochiLens 品牌版本", () => {
 test("扩展 JavaScript 文件语法有效", () => {
   for (const fileName of [
     "popup.js",
+    "config.js",
     "content.js",
     "page-bridge.js",
     "background.js",
@@ -75,6 +84,7 @@ test("弹窗使用紧凑的视频解析流程文案", () => {
 test("API Key 未出现在扩展代码中", () => {
   const extensionSource = [
     "manifest.json",
+    "config.js",
     "popup.html",
     "popup.js",
     "content.js",
@@ -93,12 +103,27 @@ test("API Key 未出现在扩展代码中", () => {
 test("扩展只连接已部署的 MochiLens 后端", () => {
   const popupJavaScript = readExtensionFile("popup.js");
   const backgroundJavaScript = readExtensionFile("background.js");
+  const config = readExtensionConfig();
   const remoteBackendURL = "https://mochilens-api.onrender.com";
 
-  assert.ok(popupJavaScript.includes(remoteBackendURL));
-  assert.ok(backgroundJavaScript.includes(remoteBackendURL));
+  assert.equal(config.backendUrl, remoteBackendURL);
+  assert.equal(config.requiredBackendPhase, "8.1");
+  assert.equal(config.requiredBackendContract, "2026-08-12");
+  assert.equal(config.requiredAIProvider, "aliyun-bailian");
+  assert.ok(popupJavaScript.includes("MOCHILENS_CONFIG"));
+  assert.ok(backgroundJavaScript.includes("MOCHILENS_CONFIG"));
   assert.equal(popupJavaScript.includes("127.0.0.1:3000"), false);
   assert.equal(backgroundJavaScript.includes("127.0.0.1:3000"), false);
+});
+
+test("扩展会阻止连接版本或 AI Provider 不匹配的后端", () => {
+  const popupJavaScript = readExtensionFile("popup.js");
+
+  assert.match(popupJavaScript, /verifyBackendCompatibility/);
+  assert.match(popupJavaScript, /REQUIRED_BACKEND_PHASE/);
+  assert.match(popupJavaScript, /REQUIRED_BACKEND_CONTRACT/);
+  assert.match(popupJavaScript, /REQUIRED_AI_PROVIDER/);
+  assert.match(popupJavaScript, /bailianConfigured/);
 });
 
 test("MochiLens 图标文件完整", () => {

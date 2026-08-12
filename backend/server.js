@@ -12,6 +12,9 @@ const AI_PROVIDER_NAME = "aliyun-bailian";
 const DEFAULT_TEXT_MODEL = "qwen3.7-flash";
 const DEFAULT_TRANSCRIPTION_MODEL = "qwen3-asr-flash";
 const DEFAULT_OMNI_MODEL = "qwen3.5-omni-flash";
+const API_CONTRACT_VERSION = "2026-08-12";
+const RELEASE_REVISION =
+  process.env.RENDER_GIT_COMMIT?.trim() || process.env.GIT_COMMIT?.trim() || "local";
 const MAX_TRANSCRIPT_LENGTH = 300000;
 const MAX_QUESTION_LENGTH = 2000;
 const MAX_AUDIO_BYTES = 7 * 1024 * 1024;
@@ -526,6 +529,8 @@ function createApp({
       ok: true,
       service: "mochilens-backend",
       phase: "8.1",
+      contractVersion: API_CONTRACT_VERSION,
+      revision: RELEASE_REVISION.slice(0, 12),
       bailianConfigured: Boolean(
         process.env.BAILIAN_API_KEY?.trim() && process.env.BAILIAN_API_HOST?.trim()
       ),

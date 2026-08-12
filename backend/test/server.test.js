@@ -75,6 +75,8 @@ test("健康接口报告 Phase 8.1", async () => {
     assert.equal(body.ok, true);
     assert.equal(body.service, "mochilens-backend");
     assert.equal(body.phase, "8.1");
+    assert.equal(body.contractVersion, "2026-08-12");
+    assert.equal(typeof body.revision, "string");
     assert.equal(typeof body.bailianConfigured, "boolean");
     assert.equal(body.aiProvider, "aliyun-bailian");
     assert.equal(typeof body.providerHost, "string");

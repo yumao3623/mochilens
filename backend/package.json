@@ -3,10 +3,12 @@
   "version": "0.4.0",
   "private": true,
   "description": "Backend API for the MochiLens Chrome extension.",
+  "packageManager": "pnpm@11.16.0",
   "main": "server.js",
   "scripts": {
     "start": "node --env-file-if-exists=.env server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "check:release": "node scripts/check-release.js"
   },
   "engines": {
     "node": ">=24"

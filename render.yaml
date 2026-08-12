@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: mochilens-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: corepack enable && pnpm install --frozen-lockfile
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 24.19.0
+      - key: HOST
+        value: 0.0.0.0
+      - key: BAILIAN_API_KEY
+        sync: false
+      - key: BAILIAN_API_HOST
+        sync: false
+      - key: BAILIAN_TEXT_MODEL
+        value: qwen3.7-flash
+      - key: BAILIAN_TRANSCRIBE_MODEL
+        value: qwen3-asr-flash
+      - key: BAILIAN_OMNI_MODEL
+        value: qwen3.5-omni-flash

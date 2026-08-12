@@ -1,4 +1,6 @@
-const BACKEND_URL = "https://mochilens-api.onrender.com";
+importScripts("config.js");
+
+const BACKEND_URL = globalThis.MOCHILENS_CONFIG.backendUrl;
 const MAX_SAMPLE_SECONDS = 9;
 const audioJobs = new Map();
 let creatingOffscreenDocument = null;
